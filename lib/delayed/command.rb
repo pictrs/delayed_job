@@ -71,7 +71,7 @@ module Delayed
           @options[:queues] = queue.split(',')
         end
         opt.on('--exclude_queues=queues', 'Specify which queues DJ must NOT look up for jobs') do |exclude_queues|
-          @options[:exlude_queues] = exclude_queues.split(',')
+          @options[:exclude_queues] = exclude_queues.split(',')
         end
         opt.on('--eval_queues=evalstring', "Specify a string, which will be eval'ed to where() while lookup. E.g. \"['created_at < ',2.days.ago]\"") do |eval_queues|
           # this will fail (throwing an exception), if option eval_queues is not a valid argument to eval or where
