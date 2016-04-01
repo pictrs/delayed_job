@@ -5,6 +5,7 @@ unless ENV['RAILS_ENV'] == 'test'
     raise "You need to add gem 'daemons' to your Gemfile if you wish to use it."
   end
 end
+require 'fileutils'
 require 'optparse'
 require 'pathname'
 
@@ -32,7 +33,7 @@ module Delayed
           exit 1
         end
         opt.on('-e', '--environment=NAME', 'Specifies the environment to run this delayed jobs under (test/development/production).') do |_e|
-          STDERR.puts 'The -e/--environment option has been deprecated and has no effect. Use RAILS_ENV and see http://github.com/collectiveidea/delayed_job/issues/#issue/7'
+          STDERR.puts 'The -e/--environment option has been deprecated and has no effect. Use RAILS_ENV and see http://github.com/collectiveidea/delayed_job/issues/7'
         end
         opt.on('--min-priority N', 'Minimum priority of jobs to run.') do |n|
           @options[:min_priority] = n
@@ -90,7 +91,7 @@ module Delayed
 
     def daemonize # rubocop:disable PerceivedComplexity
       dir = @options[:pid_dir]
-      Dir.mkdir(dir) unless File.exist?(dir)
+      FileUtils.mkdir_p(dir) unless File.exist?(dir)
 
       if worker_pools
         setup_pools
@@ -150,11 +151,7 @@ module Delayed
       @worker_pools ||= []
 
       queues, worker_count = pool.split(':')
-      if ['*', '', nil].include?(queues)
-        queues = []
-      else
-        queues = queues.split(',')
-      end
+      queues = ['*', '', nil].include?(queues) ? [] : queues.split(',')
       worker_count = (worker_count || 1).to_i rescue 1
       @worker_pools << [queues, worker_count]
     end

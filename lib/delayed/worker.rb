@@ -1,28 +1,28 @@
 require 'timeout'
+require 'active_support/dependencies'
 require 'active_support/core_ext/numeric/time'
 require 'active_support/core_ext/class/attribute_accessors'
-require 'active_support/core_ext/kernel'
-require 'active_support/core_ext/enumerable'
 require 'logger'
 require 'benchmark'
 
 module Delayed
   class Worker # rubocop:disable ClassLength
-    DEFAULT_LOG_LEVEL        = 'info'
+    DEFAULT_LOG_LEVEL        = 'info'.freeze
     DEFAULT_SLEEP_DELAY      = 5
     DEFAULT_MAX_ATTEMPTS     = 25
     DEFAULT_MAX_RUN_TIME     = 4.hours
     DEFAULT_DEFAULT_PRIORITY = 0
     DEFAULT_DELAY_JOBS       = true
-    DEFAULT_QUEUES           = []
-    DEFAULT_EXCLUDE_QUEUES   = []
+    DEFAULT_QUEUES           = [].freeze
+    DEFAULT_EXCLUDE_QUEUES   = [].freeze
     DEFAULT_EVAL_QUEUES      = nil
+    DEFAULT_QUEUE_ATTRIBUTES = [].freeze
     DEFAULT_READ_AHEAD       = 5
 
     cattr_accessor :min_priority, :max_priority, :max_attempts, :max_run_time,
                    :default_priority, :sleep_delay, :logger, :delay_jobs, :queues,
                    :read_ahead, :plugins, :destroy_failed_jobs, :exit_on_complete,
-                   :default_log_level
+                   :default_log_level, :queue_attributes
 
     # Named queue into which jobs are enqueued by default
     cattr_accessor :default_queue_name
@@ -46,6 +46,7 @@ module Delayed
       self.queues            = DEFAULT_QUEUES
       self.exclude_queues    = DEFAULT_EXCLUDE_QUEUES
       self.eval_queues       = DEFAULT_EVAL_QUEUES
+      self.queue_attributes  = DEFAULT_QUEUE_ATTRIBUTES
       self.read_ahead        = DEFAULT_READ_AHEAD
       @lifecycle             = nil
     end
@@ -178,7 +179,7 @@ module Delayed
             end
           end
 
-          count = @result.sum
+          count = @result[0] + @result[1]
 
           if count.zero?
             if self.class.exit_on_complete

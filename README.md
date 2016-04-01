@@ -205,6 +205,15 @@ Delayed::Job.enqueue job, :queue => 'tracking'
 handle_asynchronously :tweet_later, :queue => 'tweets'
 ```
 
+You can configure default priorities for named queues:
+
+```ruby
+Delayed::Worker.queue_attributes = [
+  { name: :high_priority, priority: -10 },
+  { name: :low_priority, priority: 10 }
+]
+```
+
 Running Jobs
 ============
 `script/delayed_job` can be used to manage a background process which will
@@ -424,6 +433,8 @@ By default all jobs are scheduled with `priority = 0`, which is top priority. Yo
 The default behavior is to read 5 jobs from the queue when finding an available job. You can configure this by setting `Delayed::Worker.read_ahead`.
 
 By default all jobs will be queued without a named queue. A default named queue can be specified by using `Delayed::Worker.default_queue_name`.
+
+If no jobs are found, the worker sleeps for the amount of time specified by the sleep delay option. Set `Delayed::Worker.sleep_delay = 60` for a 60 second sleep time.
 
 It is possible to disable delayed jobs for testing purposes. Set `Delayed::Worker.delay_jobs = false` to execute all jobs realtime.
 
