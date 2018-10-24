@@ -102,10 +102,13 @@ module Delayed
           run_process("delayed_job.#{@options[:identifier]}", @options)
         end
       else
-        worker_count.times do |worker_index|
-          process_name = worker_count == 1 ? 'delayed_job' : "delayed_job.#{worker_index}"
-          run_process(process_name, @options)
-        end
+        threads = worker_count.times.collect do |worker_index|
+                    Thread.new do
+                      process_name = worker_count == 1 ? 'delayed_job' : "delayed_job.#{worker_index}"
+                      run_process(process_name, @options)
+                    end
+                  end
+        threads.each(&:join)
       end
     end
 
