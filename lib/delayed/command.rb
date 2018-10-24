@@ -102,14 +102,27 @@ module Delayed
           run_process("delayed_job.#{@options[:identifier]}", @options)
         end
       else
-        threads = worker_count.times.collect do |worker_index|
-                    Thread.new do
-                      process_name = worker_count == 1 ? 'delayed_job' : "delayed_job.#{worker_index}"
-                      run_process(process_name, @options)
+          threads = worker_count.times.collect do |worker_index|
+                      if @args != ['status']
+                        Thread.new do
+                          start_by_worker_count(worker_index)
+                        end
+                      else
+                        start_by_worker_count(worker_index)
+                      end
                     end
-                  end
-        threads.each(&:join)
+          threads.each(&:join)
       end
+    end
+
+    # @param [Integer] worker_index <description>
+    #
+    # @return [Array] Empty array, for fake &join
+    #
+    def start_by_worker_count(worker_index)
+      process_name = worker_count == 1 ? 'delayed_job' : "delayed_job.#{worker_index}"
+      run_process(process_name, @options)
+      []
     end
 
     def setup_pools
